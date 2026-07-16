@@ -1,0 +1,114 @@
+{% extends "base_auth.html" %}
+{% block title %}Register — MasonTrack{% endblock %}
+
+{% block content %}
+<div class="auth-box" style="max-width:420px;">
+
+  <div class="auth-logo"><i class="bi bi-graph-up-arrow"></i></div>
+  <div class="auth-title">Create your account</div>
+  <div class="auth-subtitle">Start tracking your portfolio for free</div>
+
+  <div class="auth-card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div class="mb-3">
+        <label class="form-label" for="id_username">Username</label>
+        <input
+          type="text"
+          id="id_username"
+          name="username"
+          class="form-control"
+          placeholder="Choose a username"
+          value="{{ form.username.value|default:'' }}"
+          autocomplete="username"
+          maxlength="150"
+        >
+        {% if form.username.errors %}
+        <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ form.username.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label class="form-label" for="id_email">Email address</label>
+        <input
+          type="email"
+          id="id_email"
+          name="email"
+          class="form-control"
+          placeholder="you@example.com"
+          value="{{ form.email.value|default:'' }}"
+          autocomplete="email"
+        >
+        {% if form.email.errors %}
+        <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ form.email.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Password 1 -->
+      <div class="mb-3">
+        <label class="form-label" for="id_password1">Password</label>
+        <input
+          type="password"
+          id="id_password1"
+          name="password1"
+          class="form-control"
+          placeholder="Create a strong password"
+          autocomplete="new-password"
+        >
+        {% if form.password1.errors %}
+        <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ form.password1.errors|striptags }}
+        </div>
+        {% endif %}
+        <div style="color:var(--text-muted);font-size:0.73rem;margin-top:4px;">
+          Min 8 characters. Can't be too common or entirely numeric.
+        </div>
+      </div>
+
+      <!-- Password 2 -->
+      <div class="mb-3">
+        <label class="form-label" for="id_password2">Confirm password</label>
+        <input
+          type="password"
+          id="id_password2"
+          name="password2"
+          class="form-control"
+          placeholder="Repeat your password"
+          autocomplete="new-password"
+        >
+        {% if form.password2.errors %}
+        <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ form.password2.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger mb-3">
+        <i class="bi bi-exclamation-circle me-1"></i>{{ form.non_field_errors|striptags }}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn-accent w-100 mt-1" style="justify-content:center; padding:10px;">
+        Create Account <i class="bi bi-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="auth-divider"></div>
+    <div class="auth-footer-text">
+      Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <a href="{% url 'landing' %}" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;">← Back to home</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

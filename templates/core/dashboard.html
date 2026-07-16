@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — MasonTrack{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+
+<!-- ── TradingView Ticker Tape ── -->
+<div class="card mb-3" style="overflow:hidden;">
+  <div class="tradingview-widget-container">
+    <div class="tradingview-widget-container__widget"></div>
+  </div>
+</div>
+
+<!-- ── Stat Cards ── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card c-purple">
+      <i class="bi bi-briefcase stat-bg-icon"></i>
+      <div class="stat-label">Portfolio Value</div>
+      <div class="stat-value">{{ currency_symbol }}{{ total_value|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card c-blue">
+      <i class="bi bi-cash-coin stat-bg-icon"></i>
+      <div class="stat-label">Total Invested</div>
+      <div class="stat-value">{{ currency_symbol }}{{ total_invested|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card {% if total_pnl >= 0 %}c-green{% else %}c-red{% endif %}">
+      <i class="bi bi-{% if total_pnl >= 0 %}trending-up{% else %}trending-down{% endif %} stat-bg-icon"></i>
+      <div class="stat-label">Total P&L</div>
+      <div class="stat-value {% if total_pnl >= 0 %}pnl-pos{% else %}pnl-neg{% endif %}">
+        {% if total_pnl >= 0 %}+{% endif %}{{ currency_symbol }}{{ total_pnl|floatformat:2 }}
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card c-yellow">
+      <i class="bi bi-percent stat-bg-icon"></i>
+      <div class="stat-label">Return</div>
+      <div class="stat-value {% if pnl_pct >= 0 %}pnl-pos{% else %}pnl-neg{% endif %}">
+        {% if pnl_pct >= 0 %}+{% endif %}{{ pnl_pct|floatformat:2 }}%
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Portfolio + Chart ── -->
+<div class="row g-3 mb-3">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header">
+        <span><i class="bi bi-wallet2 me-2" style="color:var(--accent-soft)"></i>Portfolio Breakdown</span>
+        <a href="{% url 'asset_create' %}" class="btn-ghost" style="font-size:0.78rem;padding:5px 11px;">
+          <i class="bi bi-plus"></i> Add Asset
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Asset</th><th>Type</th><th>Holdings</th>
+              <th>Price</th><th>Value</th><th>P&L</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in portfolio %}
+            <tr>
+              <td class="fw-600"><a href="{% url 'asset_detail' item.asset.pk %}" style="color:var(--text-main);text-decoration:none;">{{ item.asset.name }}</a></td>
+              <td><span class="badge badge-{{ item.asset.asset_type }}">{{ item.asset.get_asset_type_display }}</span></td>
+              <td style="color:var(--text-muted)">{{ item.quantity|floatformat:4 }}</td>
+              <td>${{ item.asset.current_price|floatformat:2 }}</td>
+              <td class="fw-600">${{ item.value|floatformat:2 }}</td>
+              <td class="{% if item.pnl >= 0 %}pnl-pos{% else %}pnl-neg{% endif %}">
+                {% if item.pnl >= 0 %}+{% endif %}${{ item.pnl|floatformat:2 }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">
+              <div class="empty-state">
+                <i class="bi bi-wallet2 empty-icon"></i>
+                <p>No assets yet — add your first one</p>
+                <a href="{% url 'asset_create' %}" class="btn-accent">Add Asset</a>
+              </div>
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <span><i class="bi bi-pie-chart me-2" style="color:var(--accent-soft)"></i>Allocation</span>
+        <a href="{% url 'asset_create' %}" class="btn-ghost" style="font-size:0.78rem;padding:5px 11px;">
+          <i class="bi bi-plus"></i> Add Asset
+        </a>
+      </div>
+      <div class="card-body d-flex align-items-center justify-content-center" style="min-height:220px;">
+        {% if chart_data != "[]" %}
+        <canvas id="allocationChart"></canvas>
+        {% else %}
+        <div class="empty-state">
+          <i class="bi bi-pie-chart empty-icon"></i>
+          <p>No assets yet. Add your first asset to see your allocation chart.</p>
+          <a href="{% url 'asset_create' %}" class="btn-accent">
+            <i class="bi bi-plus-lg"></i> Add Your First Asset
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      {% if chart_data != "[]" %}
+      <div style="padding:0 16px 14px;">
+        <a href="{% url 'asset_create' %}" class="btn-ghost w-100" style="justify-content:center;font-size:0.8rem;">
+          <i class="bi bi-plus"></i> Add Another Asset
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ── Risk Calculator CTA ── -->
+<div class="card mb-3" style="border-color:rgba(124,58,237,0.35);background:linear-gradient(135deg,var(--bg-card) 60%,rgba(124,58,237,0.07));">
+  <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 20px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:44px;height:44px;border-radius:11px;background:var(--accent-glow);border:1px solid rgba(124,58,237,0.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--accent-soft);flex-shrink:0;">
+        <i class="bi bi-calculator"></i>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:0.95rem;color:var(--text-main);margin-bottom:2px;">Risk Calculator</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">Calculate position size, stop-loss distance, and R:R ratio before every trade.</div>
+      </div>
+    </div>
+    <a href="{% url 'risk_calculator' %}" class="btn-accent" style="white-space:nowrap;">
+      <i class="bi bi-lightning-charge-fill"></i> Open Calculator
+    </a>
+  </div>
+</div>
+
+<!-- ── Recent Transactions ── -->
+<div class="card">
+  <div class="card-header">
+    <span><i class="bi bi-clock-history me-2" style="color:var(--accent-soft)"></i>Recent Transactions</span>
+    <a href="{% url 'transaction_list' %}" class="btn-ghost" style="font-size:0.78rem;padding:5px 11px;">View all</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr><th>Date</th><th>Asset</th><th>Type</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+        {% for txn in recent_transactions %}
+        <tr>
+          <td style="color:var(--text-muted)">{{ txn.date|date:"M d, Y" }}</td>
+          <td class="fw-600">{{ txn.asset.name }}</td>
+          <td><span class="badge badge-{{ txn.transaction_type }}">{{ txn.get_transaction_type_display }}</span></td>
+          <td style="color:var(--text-muted)">{{ txn.quantity|floatformat:4 }}</td>
+          <td>${{ txn.price_at_time|floatformat:2 }}</td>
+          <td class="fw-600">${{ txn.total_value|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">
+          <div class="empty-state">
+            <i class="bi bi-arrow-left-right empty-icon"></i>
+            <p>No transactions yet</p>
+            <a href="{% url 'transaction_create' %}" class="btn-accent">Log your first trade</a>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- TradingView Ticker Tape -->
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+{
+  "symbols": [
+    {"proName": "FOREXCOM:SPXUSD",  "title": "S&P 500"},
+    {"proName": "BINANCE:BTCUSDT",  "title": "Bitcoin"},
+    {"proName": "BINANCE:ETHUSDT",  "title": "Ethereum"},
+    {"proName": "OANDA:XAUUSD",     "title": "Gold"},
+    {"proName": "OANDA:EURUSD",     "title": "EUR/USD"},
+    {"proName": "OANDA:GBPUSD",     "title": "GBP/USD"},
+    {"proName": "OANDA:USDJPY",     "title": "USD/JPY"},
+    {"proName": "OANDA:USDNGN",     "title": "USD/NGN"},
+    {"proName": "OANDA:USDZAR",     "title": "USD/ZAR"},
+    {"proName": "OANDA:USDINR",     "title": "USD/INR"},
+    {"proName": "NASDAQ:AAPL",      "title": "Apple"},
+    {"proName": "NASDAQ:NVDA",      "title": "NVIDIA"},
+    {"proName": "BINANCE:SOLUSDT",  "title": "Solana"},
+    {"proName": "NYMEX:CL1!",       "title": "Oil"},
+    {"proName": "TVC:NI225",        "title": "Nikkei"},
+    {"proName": "TVC:HSI",          "title": "Hang Seng"}
+  ],
+  "showSymbolLogo": true,
+  "isTransparent": true,
+  "displayMode": "adaptive",
+  "colorTheme": "dark",
+  "locale": "en"
+}
+</script>
+<script>
+  const labels = {{ chart_labels|safe }};
+  const data   = {{ chart_data|safe }};
+  if (labels.length > 0) {
+    const colors = ['#7c3aed','#58a6ff','#3fb950','#e3b341','#f85149','#a78bfa','#34d399','#60a5fa'];
+    new Chart(document.getElementById('allocationChart'), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: colors,
+          borderWidth: 3,
+          borderColor: '#1c2128',
+        }]
+      },
+      options: {
+        cutout: '66%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#8b949e', font: { size: 11 }, padding: 12, boxWidth: 10, boxHeight: 10 }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` $${ctx.parsed.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

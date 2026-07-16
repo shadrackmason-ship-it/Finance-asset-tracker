@@ -1,0 +1,74 @@
+{% extends "base_auth.html" %}
+{% block title %}Login — MasonTrack{% endblock %}
+
+{% block content %}
+<div class="auth-box">
+
+  <div class="auth-logo"><i class="bi bi-graph-up-arrow"></i></div>
+  <div class="auth-title">Welcome back</div>
+  <div class="auth-subtitle">Sign in to your MasonTrack account</div>
+
+  <div class="auth-card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger mb-3">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        {{ form.non_field_errors|striptags }}
+      </div>
+      {% endif %}
+
+      <!-- Username -->
+      <div class="mb-3">
+        <label class="form-label" for="id_username">Username</label>
+        <input
+          type="text"
+          id="id_username"
+          name="username"
+          class="form-control"
+          placeholder="Enter your username"
+          value="{{ form.username.value|default:'' }}"
+          autocomplete="username"
+        >
+        {% if form.username.errors %}
+        <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ form.username.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label class="form-label" for="id_password">Password</label>
+        <input
+          type="password"
+          id="id_password"
+          name="password"
+          class="form-control"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        >
+        {% if form.password.errors %}
+        <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ form.password.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn-accent w-100 mt-1" style="justify-content:center; padding:10px;">
+        Sign In <i class="bi bi-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="auth-divider"></div>
+    <div class="auth-footer-text">
+      Don't have an account? <a href="{% url 'register' %}">Create one free</a>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <a href="{% url 'landing' %}" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;">← Back to home</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

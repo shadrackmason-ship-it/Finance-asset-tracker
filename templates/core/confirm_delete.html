@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Confirm Delete — MasonTrack{% endblock %}
+{% block page_title %}Delete {{ type }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <div class="card" style="border-color:var(--red);">
+      <div class="card-header" style="background:var(--red-soft);color:var(--red);border-bottom-color:var(--red);">
+        <span><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</span>
+      </div>
+      <div class="card-body">
+        <p style="color:var(--text-main);margin-bottom:12px;">
+          Are you sure you want to delete <strong>{{ object }}</strong>?
+        </p>
+        {% if type == "Asset" %}
+        <div class="alert alert-warning" style="font-size:0.82rem;margin-bottom:16px;">
+          <i class="bi bi-info-circle me-1"></i>
+          This will also permanently delete all related transactions.
+        </div>
+        {% endif %}
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-accent" style="background:var(--red);">
+              <i class="bi bi-trash"></i> Yes, Delete
+            </button>
+            <a href="javascript:history.back()" class="btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Assets — MasonTrack{% endblock %}
+{% block page_title %}Assets{% endblock %}
+{% block nav_assets %}active{% endblock %}
+
+{% block content %}
+<div class="section-header mb-3">
+  <h5><i class="bi bi-wallet2 me-2" style="color:var(--accent-soft)"></i>My Assets
+    <span style="font-size:0.75rem;font-weight:400;color:var(--text-muted);margin-left:6px;">{{ assets|length }} total</span>
+  </h5>
+  <a href="{% url 'asset_create' %}" class="btn-accent"><i class="bi bi-plus-lg"></i> Add Asset</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr><th>Asset</th><th>Type</th><th>Current Price</th><th>Holdings</th><th>Value</th><th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for asset in assets %}
+        <tr>
+          <td class="fw-600"><a href="{% url 'asset_detail' asset.pk %}" style="color:var(--text-main);text-decoration:none;">{{ asset.name }}</a></td>
+          <td><span class="badge badge-{{ asset.asset_type }}">{{ asset.get_asset_type_display }}</span></td>
+          <td class="fw-600">${{ asset.current_price|floatformat:2 }}</td>
+          <td style="color:var(--text-muted)">{{ asset.total_quantity|floatformat:4 }}</td>
+          <td class="fw-600">${{ asset.current_value|floatformat:2 }}</td>
+          <td style="text-align:right">
+            <a href="{% url 'asset_update' asset.pk %}" class="btn-icon-edit me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'asset_delete' asset.pk %}" class="btn-icon-del" title="Delete"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">
+          <div class="empty-state">
+            <i class="bi bi-wallet2 empty-icon"></i>
+            <p>No assets added yet</p>
+            <a href="{% url 'asset_create' %}" class="btn-accent">Add your first asset</a>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

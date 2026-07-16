@@ -1,0 +1,24 @@
+{% extends "base_auth.html" %}
+{% block title %}Account Locked — MasonTrack{% endblock %}
+
+{% block content %}
+<div class="auth-box">
+  <div class="auth-logo" style="background:var(--red);"><i class="bi bi-shield-x"></i></div>
+  <div class="auth-title">Account Temporarily Locked</div>
+  <div class="auth-subtitle">Too many failed login attempts</div>
+  <div class="auth-card" style="text-align:center;">
+    <i class="bi bi-clock" style="font-size:2rem;color:var(--yellow);display:block;margin-bottom:14px;"></i>
+    <p style="color:var(--text-main);margin-bottom:10px;font-size:0.9rem;">
+      Your account has been locked for <strong>1 hour</strong> due to multiple failed login attempts.
+    </p>
+    <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:20px;">
+      This is an automatic security measure to protect your account from unauthorized access.
+      Please try again later.
+    </p>
+    <div class="auth-divider"></div>
+    <div class="auth-footer-text">
+      <a href="{% url 'landing' %}">← Back to home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

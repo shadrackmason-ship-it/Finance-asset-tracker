@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+{% block title %}Risk Calculator — MasonTrack{% endblock %}
+{% block page_title %}Risk Calculator{% endblock %}
+{% block nav_risk %}active{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-3">
+
+  <!-- ── Inputs ── -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-calculator me-2" style="color:var(--accent-soft)"></i>Trade Setup</span>
+      </div>
+      <div class="card-body">
+
+        <div class="mb-3">
+          <label class="form-label">Account Balance ({{ currency_symbol }})</label>
+          <input type="number" id="balance" class="form-control" placeholder="e.g. 10000" min="0" step="any">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Risk Per Trade (%)</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="riskPct" min="0.1" max="10" step="0.1" value="1"
+              style="flex:1;accent-color:var(--accent);">
+            <span id="riskPctLabel" style="min-width:38px;font-weight:700;color:var(--accent-soft);">1%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-top:3px;">
+            <span>0.1% (Safe)</span><span>2% (Standard)</span><span>10% (High)</span>
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label">Entry Price</label>
+            <input type="number" id="entry" class="form-control" placeholder="e.g. 1.0850" min="0" step="any">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Stop-Loss Price</label>
+            <input type="number" id="stopLoss" class="form-control" placeholder="e.g. 1.0800" min="0" step="any">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Take-Profit Price <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          <input type="number" id="takeProfit" class="form-control" placeholder="e.g. 1.0950" min="0" step="any">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Asset Type</label>
+          <select id="assetType" class="form-select">
+            <option value="forex">Forex / Indices</option>
+            <option value="crypto">Crypto</option>
+            <option value="stock">Stocks</option>
+            <option value="commodity">Commodities (Gold, Oil…)</option>
+          </select>
+        </div>
+
+        <button class="btn-accent w-100" onclick="calculate()" style="justify-content:center;padding:11px;">
+          <i class="bi bi-lightning-charge-fill"></i> Calculate
+        </button>
+
+        <div id="calcError" style="display:none;margin-top:10px;padding:10px 14px;background:var(--red-soft);color:var(--red);border-radius:7px;font-size:0.83rem;">
+          <i class="bi bi-exclamation-circle me-1"></i><span id="calcErrorMsg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Guide -->
+    <div class="card mt-3">
+      <div class="card-header">
+        <span><i class="bi bi-info-circle me-2" style="color:var(--blue)"></i>Risk Guide</span>
+      </div>
+      <div class="card-body" style="font-size:0.82rem;color:var(--text-muted);line-height:1.8;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;display:inline-block;"></span>
+          <span><strong style="color:var(--text-main);">0.5–1%</strong> — Conservative. Recommended for beginners.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);flex-shrink:0;display:inline-block;"></span>
+          <span><strong style="color:var(--text-main);">1–2%</strong> — Standard. Used by most professional traders.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;display:inline-block;"></span>
+          <span><strong style="color:var(--text-main);">3%+</strong> — High risk. Can wipe account in a losing streak.</span>
+        </div>
+        <div style="margin-top:10px;padding:10px;background:var(--bg-card-alt);border-radius:7px;border:1px solid var(--border);">
+          <strong style="color:var(--accent-soft);">The 2% Rule:</strong> Never risk more than 2% of your account on a single trade. At 2% risk, you need 50 consecutive losses to lose your entire account.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Results ── -->
+  <div class="col-lg-7">
+
+    <!-- Main result cards -->
+    <div class="row g-3 mb-3" id="resultsSection" style="display:none;">
+      <div class="col-6">
+        <div class="stat-card c-purple">
+          <i class="bi bi-cash-stack stat-bg-icon"></i>
+          <div class="stat-label">Money at Risk</div>
+          <div class="stat-value" id="rMoneyRisk">—</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="stat-card c-blue">
+          <i class="bi bi-layers stat-bg-icon"></i>
+          <div class="stat-label">Position Size</div>
+          <div class="stat-value" id="rPositionSize">—</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="stat-card c-red">
+          <i class="bi bi-arrow-down-circle stat-bg-icon"></i>
+          <div class="stat-label">Stop-Loss Distance</div>
+          <div class="stat-value" id="rSlDistance">—</div>
+        </div>
+      </div>
+      <div class="col-6" id="rrCard">
+        <div class="stat-card c-green">
+          <i class="bi bi-trophy stat-bg-icon"></i>
+          <div class="stat-label">Risk : Reward</div>
+          <div class="stat-value" id="rRR">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed breakdown -->
+    <div class="card" id="breakdownCard" style="display:none;">
+      <div class="card-header">
+        <span><i class="bi bi-table me-2" style="color:var(--accent-soft)"></i>Trade Breakdown</span>
+        <span id="tradeDirection" class="badge" style="font-size:0.75rem;"></span>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <table class="table" style="margin:0;">
+          <tbody id="breakdownBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- R:R Visualiser -->
+    <div class="card mt-3" id="rrVisCard" style="display:none;">
+      <div class="card-header">
+        <span><i class="bi bi-bar-chart-steps me-2" style="color:var(--accent-soft)"></i>Risk vs Reward Visualiser</span>
+      </div>
+      <div class="card-body">
+        <canvas id="rrChart" height="120"></canvas>
+      </div>
+    </div>
+
+    <!-- Streak simulator -->
+    <div class="card mt-3" id="streakCard" style="display:none;">
+      <div class="card-header">
+        <span><i class="bi bi-activity me-2" style="color:var(--yellow)"></i>Losing Streak Simulator</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">
+          How much of your account remains after consecutive losses at this risk level?
+        </p>
+        <canvas id="streakChart" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="card">
+      <div class="card-body">
+        <div class="empty-state">
+          <i class="bi bi-calculator empty-icon"></i>
+          <p>Enter your trade details and click <strong>Calculate</strong> to see your position size, risk amount, and R:R ratio.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── TradingView Chart (shown after calculate) ── -->
+<div id="tvSection" style="display:none;" class="mb-3">
+  <div class="card">
+    <div class="card-header">
+      <span><i class="bi bi-bar-chart-line me-2" style="color:var(--accent-soft)"></i>Live Chart — <span id="tvSymbolLabel">—</span></span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="tvSymbolInput" class="form-control" placeholder="e.g. BINANCE:BTCUSDT" style="width:200px;padding:5px 10px!important;font-size:0.8rem!important;">
+        <button class="btn-ghost" onclick="loadChart()" style="padding:5px 12px;font-size:0.8rem;"><i class="bi bi-search"></i> Load</button>
+      </div>
+    </div>
+    <div id="tvChartContainer" style="height:500px;"></div>
+  </div>
+</div>
+
+<!-- ── Education Section ── -->
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><span><i class="bi bi-shield-check me-2" style="color:var(--green)"></i>Position Sizing</span></div>
+      <div class="card-body" style="font-size:0.83rem;color:var(--text-muted);line-height:1.7;">
+        Position sizing determines <strong style="color:var(--text-main);">how many units</strong> to buy or sell.
+        The formula is:<br><br>
+        <code style="background:var(--bg-card-alt);padding:6px 10px;border-radius:6px;display:block;color:var(--accent-soft);font-size:0.8rem;">
+          Units = (Balance × Risk%) ÷ Stop Distance
+        </code><br>
+        This ensures every trade risks the same <em>percentage</em> of your account, not the same dollar amount.
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><span><i class="bi bi-trophy me-2" style="color:var(--yellow)"></i>Risk : Reward Ratio</span></div>
+      <div class="card-body" style="font-size:0.83rem;color:var(--text-muted);line-height:1.7;">
+        R:R compares potential profit to potential loss. A <strong style="color:var(--green);">1:2 R:R</strong> means you risk $1 to make $2.<br><br>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span><span style="color:var(--red);">❌</span> Below 1:1 — avoid these trades</span>
+          <span><span style="color:var(--yellow);">⚠️</span> 1:1 — breakeven at 50% win rate</span>
+          <span><span style="color:var(--green);">✅</span> 1:2+ — profitable even at 40% win rate</span>
+          <span><span style="color:var(--accent-soft);">🏆</span> 1:3+ — professional standard</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><span><i class="bi bi-graph-down me-2" style="color:var(--red)"></i>Drawdown Protection</span></div>
+      <div class="card-body" style="font-size:0.83rem;color:var(--text-muted);line-height:1.7;">
+        Losing streaks are inevitable. Protect your capital:<br><br>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span>At <strong style="color:var(--green);">1% risk</strong> — 10 losses = 9.6% drawdown</span>
+          <span>At <strong style="color:var(--yellow);">2% risk</strong> — 10 losses = 18.3% drawdown</span>
+          <span>At <strong style="color:var(--red);">5% risk</strong> — 10 losses = 40.1% drawdown</span>
+          <span>At <strong style="color:var(--red);">10% risk</strong> — 10 losses = 65.1% drawdown</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const sym = "{{ currency_symbol }}";
+  let rrChartInst = null, streakChartInst = null, tvWidget = null;
+
+  document.getElementById('riskPct').addEventListener('input', function() {
+    document.getElementById('riskPctLabel').textContent = this.value + '%';
+  });
+
+  function showError(msg) {
+    const el = document.getElementById('calcError');
+    document.getElementById('calcErrorMsg').textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('calcError').style.display = 'none';
+  }
+
+  function fmt(n, decimals=2) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
+  function calculate() {
+    hideError();
+    const balance   = parseFloat(document.getElementById('balance').value);
+    const riskPct   = parseFloat(document.getElementById('riskPct').value);
+    const entry     = parseFloat(document.getElementById('entry').value);
+    const sl        = parseFloat(document.getElementById('stopLoss').value);
+    const tpRaw     = document.getElementById('takeProfit').value;
+    const tp        = tpRaw ? parseFloat(tpRaw) : null;
+    const assetType = document.getElementById('assetType').value;
+
+    if (!balance || isNaN(balance) || balance <= 0) { showError('Please enter a valid Account Balance.'); return; }
+    if (!entry   || isNaN(entry)   || entry   <= 0) { showError('Please enter a valid Entry Price.'); return; }
+    if (!sl      || isNaN(sl)      || sl      <= 0) { showError('Please enter a valid Stop-Loss Price.'); return; }
+    if (entry === sl) { showError('Entry Price and Stop-Loss cannot be the same.'); return; }
+    if (tp !== null && !isNaN(tp)) {
+      const isLongCheck = entry > sl;
+      if (isLongCheck && tp <= entry) { showError('Take-Profit must be above Entry for a LONG trade.'); return; }
+      if (!isLongCheck && tp >= entry) { showError('Take-Profit must be below Entry for a SHORT trade.'); return; }
+    }
+
+    const isLong     = entry > sl;
+    const slDistance = Math.abs(entry - sl);
+    const slPct      = (slDistance / entry) * 100;
+    const moneyRisk  = balance * (riskPct / 100);
+    const positionVal= moneyRisk / slPct * 100;
+    const units      = moneyRisk / slDistance;
+
+    let rrRatio = null, potentialProfit = null;
+    if (tp !== null && !isNaN(tp)) {
+      const tpDistance = Math.abs(tp - entry);
+      rrRatio = tpDistance / slDistance;
+      potentialProfit = moneyRisk * rrRatio;
+    }
+
+    // Show results
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('resultsSection').style.display = 'flex';
+    document.getElementById('breakdownCard').style.display = '';
+    document.getElementById('streakCard').style.display = '';
+    document.getElementById('tvSection').style.display = '';
+
+    document.getElementById('rMoneyRisk').textContent    = sym + fmt(moneyRisk);
+    document.getElementById('rPositionSize').textContent = sym + fmt(positionVal);
+    document.getElementById('rSlDistance').textContent   = fmt(slDistance, 5) + ' (' + fmt(slPct, 2) + '%)';
+
+    const dir = document.getElementById('tradeDirection');
+    dir.textContent = isLong ? '\u25b2 LONG' : '\u25bc SHORT';
+    dir.style.background = isLong ? 'var(--green-soft)' : 'var(--red-soft)';
+    dir.style.color = isLong ? 'var(--green)' : 'var(--red)';
+
+    // Breakdown table
+    const rows = [
+      ['Account Balance', sym + fmt(balance)],
+      ['Risk Amount',     sym + fmt(moneyRisk) + ' (' + riskPct + '%)'],
+      ['Direction',       isLong ? 'LONG (Buy)' : 'SHORT (Sell)'],
+      ['Entry Price',     fmt(entry, 5)],
+      ['Stop-Loss',       fmt(sl, 5) + ' (' + fmt(slPct, 2) + '% away)'],
+      ['Position Value',  sym + fmt(positionVal)],
+      ['Units / Qty',     fmt(units, 4)],
+    ];
+    if (tp !== null && rrRatio !== null) {
+      rows.push(['Take-Profit',    fmt(tp, 5)]);
+      rows.push(['Potential Profit', sym + fmt(potentialProfit)]);
+      rows.push(['Risk : Reward',  '1 : ' + fmt(rrRatio, 2)]);
+    }
+
+    document.getElementById('breakdownBody').innerHTML = rows.map(([k, v]) =>
+      `<tr>
+        <td style="color:var(--text-muted);font-size:0.82rem;padding:9px 16px;">${k}</td>
+        <td style="font-weight:600;font-size:0.875rem;padding:9px 16px;text-align:right;">${v}</td>
+      </tr>`
+    ).join('');
+
+    // R:R card
+    if (rrRatio !== null) {
+      document.getElementById('rrCard').style.display = '';
+      document.getElementById('rRR').textContent = '1 : ' + fmt(rrRatio, 2);
+      const rrCardEl = document.getElementById('rrCard').querySelector('.stat-card');
+      rrCardEl.className = 'stat-card ' + (rrRatio >= 2 ? 'c-green' : rrRatio >= 1 ? 'c-yellow' : 'c-red');
+      document.getElementById('rrVisCard').style.display = '';
+      renderRRChart(moneyRisk, potentialProfit, rrRatio);
+    } else {
+      document.getElementById('rrCard').style.display = 'none';
+      document.getElementById('rrVisCard').style.display = 'none';
+    }
+
+    renderStreakChart(balance, riskPct);
+
+    // Auto-load TradingView chart based on asset type
+    const symbolMap = {
+      forex:     'OANDA:EURUSD',
+      crypto:    'BINANCE:BTCUSDT',
+      stock:     'NASDAQ:AAPL',
+      commodity: 'OANDA:XAUUSD',
+    };
+    const autoSymbol = symbolMap[assetType] || 'BINANCE:BTCUSDT';
+    document.getElementById('tvSymbolInput').value = autoSymbol;
+    loadChart(autoSymbol);
+
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function loadChart(symbol) {
+    symbol = symbol || document.getElementById('tvSymbolInput').value.trim() || 'BINANCE:BTCUSDT';
+    document.getElementById('tvSymbolLabel').textContent = symbol;
+    document.getElementById('tvSymbolInput').value = symbol;
+    const container = document.getElementById('tvChartContainer');
+    container.innerHTML = '';
+    new TradingView.widget({
+      container_id: 'tvChartContainer',
+      symbol: symbol,
+      interval: 'H1',
+      timezone: '{{ user_timezone|default:"Etc/UTC" }}',
+      theme: 'dark',
+      style: '1',
+      locale: 'en',
+      toolbar_bg: '#161b22',
+      enable_publishing: false,
+      hide_side_toolbar: false,
+      allow_symbol_change: true,
+      save_image: false,
+      height: 500,
+      width: '100%',
+      studies: ['RSI@tv-basicstudies', 'MACD@tv-basicstudies'],
+      withdateranges: true,
+    });
+  }
+
+  function renderRRChart(risk, reward, ratio) {
+    if (rrChartInst) rrChartInst.destroy();
+    const label = ratio >= 2 ? '\u2705 Good R:R' : ratio >= 1 ? '\u26a0\ufe0f Acceptable' : '\u274c Poor R:R';
+    rrChartInst = new Chart(document.getElementById('rrChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Risk (Stop-Loss)', 'Reward (Take-Profit)'],
+        datasets: [{
+          data: [risk, reward],
+          backgroundColor: ['rgba(248,81,73,0.7)', 'rgba(63,185,80,0.7)'],
+          borderColor: ['#f85149', '#3fb950'],
+          borderWidth: 2, borderRadius: 6,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${sym}${ctx.parsed.x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} \u2014 ${label}` } }
+        },
+        scales: {
+          x: { ticks: { color: '#8b949e', callback: v => sym + v.toLocaleString() }, grid: { color: '#30363d' } },
+          y: { ticks: { color: '#e6edf3' }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function renderStreakChart(balance, riskPct) {
+    if (streakChartInst) streakChartInst.destroy();
+    const labels = [], data = [];
+    let bal = balance;
+    for (let i = 0; i <= 20; i++) {
+      labels.push(i === 0 ? 'Start' : `L${i}`);
+      data.push(parseFloat(bal.toFixed(2)));
+      bal = bal * (1 - riskPct / 100);
+    }
+    streakChartInst = new Chart(document.getElementById('streakChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Account Balance',
+          data,
+          borderColor: '#f85149',
+          backgroundColor: 'rgba(248,81,73,0.08)',
+          fill: true, tension: 0.3, pointRadius: 3,
+          pointBackgroundColor: '#f85149',
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${sym}${ctx.parsed.y.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` } }
+        },
+        scales: {
+          x: { ticks: { color: '#8b949e', font: { size: 10 } }, grid: { color: '#30363d' } },
+          y: { ticks: { color: '#8b949e', callback: v => sym + v.toLocaleString() }, grid: { color: '#30363d' } }
+        }
+      }
+    });
+  }
+</script>
+<script src="https://s3.tradingview.com/tv.js"></script>
+{% endblock %}

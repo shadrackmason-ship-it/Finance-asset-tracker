@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — MasonTrack{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block nav_assets %}active{% endblock %}
+
+{% block content %}
+<div class="row g-3 justify-content-center">
+
+  <!-- ── Form ── -->
+  <div class="col-md-7 col-lg-5">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-wallet2 me-2" style="color:var(--accent-soft)"></i>{{ title }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <div style="font-size:0.73rem;color:var(--text-muted);margin-top:4px;">
+              <i class="bi bi-info-circle me-1"></i>{{ field.help_text }}
+            </div>
+            {% endif %}
+            {% if field.errors %}
+            <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+              <i class="bi bi-exclamation-circle me-1"></i>{{ field.errors|striptags }}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-accent"><i class="bi bi-check-lg"></i> Save Asset</button>
+            <a href="{% url 'asset_list' %}" class="btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Help Panel ── -->
+  <div class="col-md-5 col-lg-4">
+
+    <!-- Quick examples -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span><i class="bi bi-lightning me-2" style="color:var(--yellow)"></i>Quick Examples</span>
+      </div>
+      <div class="card-body" style="padding:10px;">
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;">Click any example to fill the form:</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          {% for ex in examples %}
+          <button onclick="fillExample('{{ ex.name }}','{{ ex.type }}','{{ ex.price }}','{{ ex.symbol }}')"
+            style="background:var(--bg-card-alt);border:1px solid var(--border);border-radius:7px;padding:8px 12px;text-align:left;cursor:pointer;transition:border-color 0.15s;"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:600;font-size:0.83rem;color:var(--text-main);">{{ ex.name }}</span>
+              <span class="badge badge-{{ ex.type }}" style="font-size:0.65rem;">{{ ex.type_display }}</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">{{ ex.symbol }} · ~${{ ex.price }}</div>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- TradingView symbol guide -->
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-bar-chart-line me-2" style="color:var(--accent-soft)"></i>TradingView Symbol Guide</span>
+      </div>
+      <div class="card-body" style="font-size:0.78rem;color:var(--text-muted);line-height:1.8;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div><span style="color:var(--accent-soft);font-weight:600;">Crypto:</span> BINANCE:BTCUSDT, BINANCE:ETHUSDT</div>
+          <div><span style="color:var(--blue);font-weight:600;">Forex:</span> OANDA:EURUSD, OANDA:GBPUSD</div>
+          <div><span style="color:var(--yellow);font-weight:600;">Gold/Oil:</span> OANDA:XAUUSD, NYMEX:CL1!</div>
+          <div><span style="color:var(--green);font-weight:600;">Stocks:</span> NASDAQ:AAPL, NYSE:TSLA</div>
+          <div><span style="color:var(--text-muted);font-weight:600;">Indices:</span> FOREXCOM:SPXUSD, TVC:NI225</div>
+        </div>
+        <div style="margin-top:10px;padding:8px 10px;background:var(--bg-card-alt);border-radius:6px;border:1px solid var(--border);">
+          The TradingView symbol links your asset to a live chart on the Market page.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function fillExample(name, type, price, symbol) {
+    const nameEl   = document.querySelector('[name="name"]');
+    const typeEl   = document.querySelector('[name="asset_type"]');
+    const priceEl  = document.querySelector('[name="current_price"]');
+    const symbolEl = document.querySelector('[name="tv_symbol"]');
+    if (nameEl)   nameEl.value   = name;
+    if (typeEl)   typeEl.value   = type;
+    if (priceEl)  priceEl.value  = price;
+    if (symbolEl) symbolEl.value = symbol;
+  }
+</script>
+{% endblock %}

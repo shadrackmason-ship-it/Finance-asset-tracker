@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Profile & Settings — MasonTrack{% endblock %}
+{% block page_title %}Profile & Settings{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+  <!-- Left: Profile form -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-person-circle me-2" style="color:var(--accent-soft)"></i>Personal Information</span>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label">First Name</label>
+              {{ form.first_name }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Last Name</label>
+              {{ form.last_name }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div style="color:var(--red);font-size:0.76rem;margin-top:4px;">{{ form.email.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Country</label>
+            {{ form.country }}
+          </div>
+
+          <hr style="border-color:var(--border);margin:20px 0;">
+
+          <div class="row g-3 mb-3">
+            <!-- Currency -->
+            <div class="col-sm-6">
+              <label class="form-label">
+                <i class="bi bi-currency-exchange me-1" style="color:var(--accent-soft)"></i>
+                Display Currency
+              </label>
+              {{ form.preferred_currency }}
+              <div style="font-size:0.73rem;color:var(--text-muted);margin-top:4px;">
+                All portfolio values will display in this currency
+              </div>
+            </div>
+            <!-- Timezone -->
+            <div class="col-sm-6">
+              <label class="form-label">
+                <i class="bi bi-clock me-1" style="color:var(--accent-soft)"></i>
+                Timezone
+              </label>
+              {{ form.timezone }}
+              <div style="font-size:0.73rem;color:var(--text-muted);margin-top:4px;">
+                Transaction dates will display in this timezone
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-accent">
+            <i class="bi bi-check-lg"></i> Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Account summary -->
+  <div class="col-lg-5">
+
+    <!-- Current settings card -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span><i class="bi bi-globe me-2" style="color:var(--accent-soft)"></i>Current Settings</span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text-muted);font-size:0.82rem;">Username</span>
+            <span class="fw-600">{{ user.username }}</span>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text-muted);font-size:0.82rem;">Display Currency</span>
+            <span class="fw-600" style="color:var(--accent-soft);">
+              {{ currency_symbol }} {{ user_currency }}
+            </span>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text-muted);font-size:0.82rem;">Timezone</span>
+            <span class="fw-600" style="font-size:0.82rem;">{{ user_timezone }}</span>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--text-muted);font-size:0.82rem;">Member Since</span>
+            <span style="color:var(--text-muted);font-size:0.82rem;">{{ user.date_joined|date:"M d, Y" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supported regions -->
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-map me-2" style="color:var(--accent-soft)"></i>Supported Regions</span>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          {% for region, flag, desc in regions %}
+          <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg-card-alt);border-radius:7px;border:1px solid var(--border);">
+            <span style="font-size:1.2rem;">{{ flag }}</span>
+            <div>
+              <div style="font-size:0.78rem;font-weight:600;color:var(--text-main);">{{ region }}</div>
+              <div style="font-size:0.68rem;color:var(--text-muted);">{{ desc }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

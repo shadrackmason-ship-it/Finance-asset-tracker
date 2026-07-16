@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — MasonTrack{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block nav_transactions %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-arrow-left-right me-2" style="color:var(--accent-soft)"></i>{{ title }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div style="color:var(--red);font-size:0.76rem;margin-top:4px;">
+              <i class="bi bi-exclamation-circle me-1"></i>{{ field.errors|striptags }}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-accent">Save Transaction</button>
+            <a href="{% url 'dashboard' %}" class="btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }} — MasonTrack{% endblock %}
+{% block page_title %}{{ asset.name }}{% endblock %}
+{% block nav_assets %}active{% endblock %}
+
+{% block content %}
+
+<div class="row g-3 mb-3">
+  <!-- Stat cards -->
+  <div class="col-6 col-lg-3">
+    <div class="stat-card c-purple">
+      <i class="bi bi-coin stat-bg-icon"></i>
+      <div class="stat-label">Current Price</div>
+      <div class="stat-value" style="font-size:1.2rem;">${{ asset.current_price|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card c-blue">
+      <i class="bi bi-stack stat-bg-icon"></i>
+      <div class="stat-label">Holdings</div>
+      <div class="stat-value" style="font-size:1.2rem;">{{ asset.total_quantity|floatformat:4 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card c-yellow">
+      <i class="bi bi-wallet2 stat-bg-icon"></i>
+      <div class="stat-label">Current Value</div>
+      <div class="stat-value" style="font-size:1.2rem;">${{ asset.current_value|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card {% if pnl >= 0 %}c-green{% else %}c-red{% endif %}">
+      <i class="bi bi-trending-{% if pnl >= 0 %}up{% else %}down{% endif %} stat-bg-icon"></i>
+      <div class="stat-label">P&L</div>
+      <div class="stat-value {% if pnl >= 0 %}pnl-pos{% else %}pnl-neg{% endif %}" style="font-size:1.2rem;">
+        {% if pnl >= 0 %}+{% endif %}${{ pnl|floatformat:2 }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- TradingView Chart -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <span>
+          <i class="bi bi-bar-chart-line me-2" style="color:var(--accent-soft)"></i>
+          {{ asset.name }} Live Chart
+        </span>
+        {% if asset.tv_symbol %}
+        <a href="{% url 'market' %}?symbol={{ asset.tv_symbol }}" class="btn-ghost" style="font-size:0.78rem;padding:5px 11px;">
+          <i class="bi bi-arrows-fullscreen"></i> Full Chart
+        </a>
+        {% endif %}
+      </div>
+      <div style="height:400px;">
+        {% if asset.tv_symbol %}
+        <div class="tradingview-widget-container" style="height:100%;">
+          <div class="tradingview-widget-container__widget" style="height:100%;"></div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding-top:80px;">
+          <i class="bi bi-bar-chart-line empty-icon"></i>
+          <p>No TradingView symbol set for this asset</p>
+          <a href="{% url 'asset_update' asset.pk %}" class="btn-accent">
+            <i class="bi bi-pencil"></i> Add TV Symbol
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Asset Info -->
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header">
+        <span><i class="bi bi-info-circle me-2" style="color:var(--accent-soft)"></i>Asset Info</span>
+        <a href="{% url 'asset_update' asset.pk %}" class="btn-icon-edit"><i class="bi bi-pencil"></i></a>
+      </div>
+      <div class="card-body">
+        <table class="table mb-0" style="font-size:0.855rem;">
+          <tr>
+            <td style="color:var(--text-muted);border:none;padding:6px 0;">Name</td>
+            <td class="fw-600" style="border:none;padding:6px 0;">{{ asset.name }}</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted);border:none;padding:6px 0;">Type</td>
+            <td style="border:none;padding:6px 0;"><span class="badge badge-{{ asset.asset_type }}">{{ asset.get_asset_type_display }}</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted);border:none;padding:6px 0;">TV Symbol</td>
+            <td class="fw-600" style="border:none;padding:6px 0;">
+              {% if asset.tv_symbol %}
+                <a href="{% url 'market' %}?symbol={{ asset.tv_symbol }}" style="color:var(--accent-soft);text-decoration:none;">
+                  {{ asset.tv_symbol }}
+                </a>
+              {% else %}
+                <span style="color:var(--text-muted)">Not set</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted);border:none;padding:6px 0;">Cost Basis</td>
+            <td class="fw-600" style="border:none;padding:6px 0;">${{ cost_basis|floatformat:2 }}</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted);border:none;padding:6px 0;">Added</td>
+            <td style="color:var(--text-muted);border:none;padding:6px 0;">{{ asset.created_at|date:"M d, Y" }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="d-flex gap-2">
+      <a href="{% url 'transaction_create' %}" class="btn-accent" style="flex:1;justify-content:center;">
+        <i class="bi bi-plus-circle"></i> Log Trade
+      </a>
+      <a href="{% url 'asset_delete' asset.pk %}" class="btn-icon-del" style="width:auto;padding:8px 14px;border-radius:7px;">
+        <i class="bi bi-trash"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction history for this asset -->
+<div class="card mt-3">
+  <div class="card-header">
+    <span><i class="bi bi-clock-history me-2" style="color:var(--accent-soft)"></i>{{ asset.name }} Transactions</span>
+    <span style="font-size:0.75rem;color:var(--text-muted);">{{ transactions|length }} total</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr><th>Date</th><th>Type</th><th>Qty</th><th>Price</th><th>Total</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        {% for txn in transactions %}
+        <tr>
+          <td style="color:var(--text-muted)">{{ txn.date|date:"M d, Y" }}</td>
+          <td><span class="badge badge-{{ txn.transaction_type }}">{{ txn.get_transaction_type_display }}</span></td>
+          <td style="color:var(--text-muted)">{{ txn.quantity|floatformat:4 }}</td>
+          <td>${{ txn.price_at_time|floatformat:2 }}</td>
+          <td class="fw-600">${{ txn.total_value|floatformat:2 }}</td>
+          <td style="color:var(--text-muted);font-size:0.8rem;">{{ txn.notes|truncatechars:30 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">
+          <div class="empty-state">
+            <i class="bi bi-arrow-left-right empty-icon"></i>
+            <p>No transactions for this asset yet</p>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% if asset.tv_symbol %}
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+{
+  "autosize": true,
+  "symbol": "{{ asset.tv_symbol }}",
+  "interval": "D",
+  "timezone": "Etc/UTC",
+  "theme": "dark",
+  "style": "1",
+  "locale": "en",
+  "backgroundColor": "#1c2128",
+  "gridColor": "rgba(48,54,61,0.4)",
+  "hide_top_toolbar": false,
+  "hide_legend": false,
+  "save_image": false,
+  "hide_volume": false
+}
+</script>
+{% endif %}
+{% endblock %}
