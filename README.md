@@ -2,7 +2,7 @@
 
 A professional personal finance and trading tool built for traders and investors worldwide. Track your portfolio, manage assets, calculate trade risk, and view live market charts — all in one place.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![Django](https://img.shields.io/badge/Django-6.0-green) ![Docker](https://img.shields.io/badge/Docker-ready-blue) ![License](https://img.shields.io/badge/License-MIT-yellow)
+!Python, Django, Docker, License
 
 ---
 
@@ -41,7 +41,7 @@ A professional personal finance and trading tool built for traders and investors
 git clone https://github.com/shadrackmason-ship-it/Finance-asset-tracker.git
 cd Finance-asset-tracker
 
-# 2. Create virtual environment
+# 2. Create a virtual environment
 python -m venv venv
 source venv/bin/activate
 
