@@ -1,5 +1,6 @@
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,6 +24,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,20 +58,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
-        'NAME': config('DB_NAME', default=str(BASE_DIR / 'db.sqlite3')),
-        'USER': config('DB_USER', default=''),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default=''),
-        'PORT': config('DB_PORT', default=''),
-        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=60, cast=int),
-        'OPTIONS': {
-            'connect_timeout': 10,
-        } if config('DB_ENGINE', default='django.db.backends.sqlite3') != 'django.db.backends.sqlite3' else {},
+# ── Database — supports both DATABASE_URL (Render) and individual vars (Docker) ──
+DATABASE_URL = config('DATABASE_URL', default='')
+if DATABASE_URL:
+    DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=60)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
+            'NAME': config('DB_NAME', default=str(BASE_DIR / 'db.sqlite3')),
+            'USER': config('DB_USER', default=''),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default=''),
+            'PORT': config('DB_PORT', default=''),
+            'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=60, cast=int),
+            'OPTIONS': {
+                'connect_timeout': 10,
+            } if config('DB_ENGINE', default='django.db.backends.sqlite3') != 'django.db.backends.sqlite3' else {},
+        }
     }
-}
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -94,6 +101,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -121,14 +129,12 @@ CSRF_COOKIE_NAME = 'ct'
 # ── Clickjacking ──
 X_FRAME_OPTIONS = 'DENY'
 
-# ── HTTPS (production) ──
-# SECURE_SSL_REDIRECT is handled by nginx, not Django
-# so we only set cookie/header security, not redirect
+# ── HTTPS — Render terminates SSL, so trust forwarded headers ──
 if not DEBUG:
-    SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
-    CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
-    SECURE_SSL_REDIRECT = False  # nginx handles this
-    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=0, cast=int)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = False  # Render/nginx handles this
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -195,42 +201,17 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='MasonTrack <noreply@masontrack.com>')
 OWNER_EMAIL = config('OWNER_EMAIL', default='')
 
-# ── Logging ──
+# ── Logging — use console only on Render (no file system persistence) ──
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'clean': {
-            'format': '[{asctime}] {levelname} {message}',
-            'style': '{',
-        },
-    },
+    'formatters': {'clean': {'format': '[{asctime}] {levelname} {message}', 'style': '{'}},
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'clean',
-        },
-        'security_file': {
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'security.log',
-            'formatter': 'clean',
-        },
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'clean'},
     },
     'loggers': {
-        'django.security': {
-            'handlers': ['console', 'security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'axes': {
-            'handlers': ['security_file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'masontrack': {
-            'handlers': ['console', 'security_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
+        'django.security': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'axes':            {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'masontrack':      {'handlers': ['console'], 'level': 'INFO',    'propagate': False},
     },
 }
