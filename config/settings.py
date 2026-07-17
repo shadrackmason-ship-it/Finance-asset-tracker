@@ -7,7 +7,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='').split(',') if config('CSRF_TRUSTED_ORIGINS', default='') else []
+# Always allow Render domains
+ALLOWED_HOSTS += ['.onrender.com', '127.0.0.1', 'localhost']
+
+_csrf = config('CSRF_TRUSTED_ORIGINS', default='')
+CSRF_TRUSTED_ORIGINS = _csrf.split(',') if _csrf else []
+# Always trust Render HTTPS
+CSRF_TRUSTED_ORIGINS += ['https://*.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
