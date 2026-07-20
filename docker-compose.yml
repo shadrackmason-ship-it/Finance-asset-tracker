@@ -1,7 +1,9 @@
 version: "3.9"
 
 services:
-  db:
+
+  # ── DATABASE ─────────────────────────────────────────────────────────────────
+  database:
     image: postgres:16-alpine
     restart: always
     environment:
@@ -28,7 +30,8 @@ services:
       timeout: 3s
       retries: 10
 
-  web:
+  # ── BACKEND ──────────────────────────────────────────────────────────────────
+  backend:
     build: .
     restart: always
     expose:
@@ -52,12 +55,13 @@ services:
                --max-requests-jitter 100
                --log-level info"
     depends_on:
-      db:
+      database:
         condition: service_healthy
       redis:
         condition: service_healthy
 
-  nginx:
+  # ── FRONTEND ─────────────────────────────────────────────────────────────────
+  frontend:
     image: nginx:alpine
     restart: always
     ports:
@@ -67,7 +71,7 @@ services:
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
     depends_on:
-      - web
+      - backend
 
 volumes:
   postgres_data:

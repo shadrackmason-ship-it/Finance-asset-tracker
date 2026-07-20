@@ -1,22 +1,21 @@
-# MasonTrack — Finance & Trading App
+# MasonTrack
 
-A professional personal finance and trading tool built for traders and investors worldwide. Track your portfolio, manage assets, calculate trade risk, and view live market charts — all in one place.
-
-!Python, Django, Docker, License
+A personal finance and trading tool for traders and investors. Track your portfolio, manage assets, calculate trade risk, and view live market charts.
 
 ---
 
 ## Features
 
-- **Portfolio Dashboard** — Track all your assets with real-time P&L, cost basis, and return %
-- **Risk Calculator** — Calculate position size, money at risk, stop-loss distance, and R:R ratio before every trade
-- **Live TradingView Charts** — Full interactive charts with RSI, MACD, and 100+ indicators
-- **Asset Allocation Chart** — Visual doughnut chart showing your portfolio breakdown
-- **Transaction History** — Log every buy, sell, deposit, and withdrawal with full audit trail
-- **50+ World Currencies** — USD, EUR, NGN, KES, ZAR, INR, BRL and more
-- **55+ Timezones** — All timestamps in your local timezone
-- **Bank-Grade Security** — Brute-force lockout, CSRF protection, CSP headers, rate limiting
-- **Global Market Coverage** — Crypto, Forex, Stocks, Commodities, Indices
+- Portfolio dashboard with real-time P&L, cost basis, and return percentage
+- Risk calculator — position size, money at risk, stop-loss distance, R:R ratio
+- Live TradingView charts with RSI, MACD, and 100+ indicators
+- Asset allocation chart showing portfolio breakdown
+- Transaction history — buy, sell, deposit, withdrawal with full audit trail
+- 50+ world currencies (USD, EUR, NGN, KES, ZAR, INR, BRL and more)
+- 55+ timezones — all timestamps in your local timezone
+- Brute-force lockout, CSRF protection, CSP headers, rate limiting
+- Global market coverage — Crypto, Forex, Stocks, Commodities, Indices
+- REST API with JWT authentication
 
 ---
 
@@ -24,12 +23,13 @@ A professional personal finance and trading tool built for traders and investors
 
 | Layer | Technology |
 |---|---|
-| Backend | Django 6.0 |
+| Backend | Django 6.0 + Django REST Framework |
 | Database | PostgreSQL 16 |
 | Cache | Redis 7 |
 | Web Server | Nginx + Gunicorn |
 | Charts | TradingView Widgets + Chart.js |
 | Deployment | Docker + Docker Compose |
+| CI/CD | GitHub Actions |
 | Security | django-axes, django-csp, django-honeypot |
 
 ---
@@ -37,47 +37,40 @@ A professional personal finance and trading tool built for traders and investors
 ## Quick Start (Local)
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/shadrackmason-ship-it/Finance-asset-tracker.git
 cd Finance-asset-tracker
 
-# 2. Create a virtual environment
 python -m venv venv
 source venv/bin/activate
 
-# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Create .env file
 cp .env.example .env
 # Edit .env with your settings
 
-# 5. Run migrations
 python manage.py migrate
-
-# 6. Create superuser
 python manage.py createsuperuser
-
-# 7. Start server
 python manage.py runserver
 ```
 
-Open **http://127.0.0.1:8000**
+Open http://127.0.0.1:8000
 
 ---
 
 ## Deploy with Docker
 
 ```bash
-# 1. Clone the repo on your server
 git clone https://github.com/shadrackmason-ship-it/Finance-asset-tracker.git
 cd Finance-asset-tracker
-
-# 2. Run the deploy script
 sudo bash deploy.sh
 ```
 
-App will be live at **http://your-server-ip**
+The stack starts four services:
+
+- **frontend** — Nginx on port 80, serves static files and proxies to backend
+- **backend** — Django + Gunicorn on port 8000
+- **database** — PostgreSQL 16
+- **redis** — Redis 7 for sessions and rate limiting
 
 ---
 
@@ -94,7 +87,7 @@ DB_ENGINE=django.db.backends.postgresql
 DB_NAME=masontrack_db
 DB_USER=masontrack
 DB_PASSWORD=your-db-password
-DB_HOST=db
+DB_HOST=database
 DB_PORT=5432
 
 CACHE_BACKEND=django.core.cache.backends.redis.RedisCache
@@ -108,28 +101,44 @@ EMAIL_HOST_PASSWORD=your-app-password
 
 ---
 
-## Risk Calculator
+## REST API
 
-The built-in risk calculator helps traders:
+All API endpoints require a JWT token. Get one first:
 
-- Know exactly **how much money to risk** per trade
-- Calculate the correct **position size** based on account balance
-- See the **Risk:Reward ratio** before entering a trade
-- Visualize **losing streak impact** on their account
-- View a **live TradingView chart** for the selected asset
-
-**Formula used:**
 ```
-Position Size = (Account Balance × Risk %) ÷ Stop-Loss Distance
+POST /api/auth/token/
+{ "username": "you", "password": "yourpassword" }
 ```
+
+Then pass the token in the Authorization header:
+
+```
+Authorization: Bearer <access_token>
+```
+
+### Endpoints
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| POST | /api/auth/token/ | Get JWT access + refresh tokens |
+| POST | /api/auth/refresh/ | Refresh access token |
+| GET, POST | /api/assets/ | List or create assets |
+| GET, PUT, DELETE | /api/assets/{id}/ | Retrieve, update, or delete an asset |
+| GET, POST | /api/transactions/ | List or log transactions |
+| GET, PUT, DELETE | /api/transactions/{id}/ | Retrieve, update, or delete a transaction |
+| GET, POST | /api/journal/ | List or create journal entries |
+| GET, PUT, DELETE | /api/journal/{id}/ | Retrieve, update, or delete a journal entry |
+| GET, POST | /api/watchlist/ | List or add watchlist items |
+| GET, DELETE | /api/watchlist/{id}/ | Retrieve or remove a watchlist item |
+| GET | /api/portfolio/ | Full portfolio summary with P&L |
 
 ---
 
-## Screenshots
+## Risk Calculator
 
-| Dashboard | Risk Calculator | Market |
-|---|---|---|
-| Portfolio overview with P&L | Position sizing tool | Live TradingView charts |
+```
+Position Size = (Account Balance x Risk %) / Stop-Loss Distance
+```
 
 ---
 
@@ -145,9 +154,45 @@ Position Size = (Account Balance × Risk %) ÷ Stop-Loss Distance
 
 ---
 
+## Running Tests
+
+```bash
+python manage.py test --verbosity=2
+```
+
+Tests cover authentication, all 5 API schemes, row-level isolation, and user registration/login/profile.
+
+---
+
+## CI/CD
+
+GitHub Actions runs on every push to `main`:
+
+1. Runs all Django tests against a real PostgreSQL instance
+2. Builds and pushes the backend Docker image to GitHub Container Registry
+3. Builds and pushes the frontend Docker image to GitHub Container Registry
+4. SSHs into the production server and runs `docker compose up`
+
+Required GitHub secrets:
+
+| Secret | Description |
+|--------|-------------|
+| DEPLOY_HOST | IP address or domain of your server |
+| DEPLOY_USER | SSH username on the server |
+| DEPLOY_SSH_KEY | Private SSH key for the server |
+
+---
+
+## Project Docs
+
+- [Architecture Diagram](docs/ARCHITECTURE.md)
+- [Kanban Board](docs/KANBAN.md)
+
+---
+
 ## License
 
-MIT License — free to use, modify, and distribute.
+MIT License
 
 ---
 

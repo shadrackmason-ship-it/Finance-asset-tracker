@@ -1,0 +1,45 @@
+from rest_framework import serializers
+from .models import Asset, Transaction, TradeJournal, Watchlist
+
+
+class AssetSerializer(serializers.ModelSerializer):
+    total_quantity = serializers.ReadOnlyField()
+    current_value  = serializers.ReadOnlyField()
+
+    class Meta:
+        model  = Asset
+        fields = ['id', 'name', 'asset_type', 'current_price', 'tv_symbol',
+                  'total_quantity', 'current_value', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    asset_name  = serializers.ReadOnlyField(source='asset.name')
+    total_value = serializers.ReadOnlyField()
+
+    class Meta:
+        model  = Transaction
+        fields = ['id', 'asset', 'asset_name', 'transaction_type',
+                  'quantity', 'price_at_time', 'total_value', 'date', 'notes']
+        read_only_fields = ['id']
+
+    def validate_asset(self, asset):
+        if asset.user != self.context['request'].user:
+            raise serializers.ValidationError('Asset not found.')
+        return asset
+
+
+class TradeJournalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = TradeJournal
+        fields = ['id', 'symbol', 'direction', 'entry_price', 'exit_price',
+                  'stop_loss', 'take_profit', 'lot_size', 'outcome',
+                  'pnl', 'rr_ratio', 'setup_notes', 'lesson', 'date']
+        read_only_fields = ['id']
+
+
+class WatchlistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Watchlist
+        fields = ['id', 'symbol', 'tv_symbol', 'notes', 'added_at']
+        read_only_fields = ['id', 'added_at']
