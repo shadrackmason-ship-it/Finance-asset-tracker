@@ -11,4 +11,3 @@ media/
 *.egg-info/
 logs/*.log
 .DS_Store
-.github/
