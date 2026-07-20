@@ -4,8 +4,8 @@ from .models import Asset, Transaction, TradeJournal, Watchlist
 
 
 class AssetSerializer(serializers.ModelSerializer):
-    total_quantity = serializers.ReadOnlyField()
-    current_value  = serializers.ReadOnlyField()
+    total_quantity = serializers.DecimalField(max_digits=20, decimal_places=8, read_only=True)
+    current_value  = serializers.DecimalField(max_digits=20, decimal_places=8, read_only=True)
 
     @extend_schema_field(serializers.DecimalField(max_digits=20, decimal_places=8))
     def get_total_quantity(self): pass

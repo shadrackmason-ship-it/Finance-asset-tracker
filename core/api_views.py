@@ -26,6 +26,8 @@ from .serializers import (
 class AssetViewSet(viewsets.ModelViewSet):
     serializer_class   = AssetSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field       = 'pk'
+    lookup_value_regex = '[0-9]+'
 
     def get_queryset(self):
         return Asset.objects.filter(user=self.request.user)
@@ -46,6 +48,8 @@ class AssetViewSet(viewsets.ModelViewSet):
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class   = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field       = 'pk'
+    lookup_value_regex = '[0-9]+'
 
     def get_queryset(self):
         return Transaction.objects.filter(user=self.request.user).select_related('asset')
@@ -66,6 +70,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class TradeJournalViewSet(viewsets.ModelViewSet):
     serializer_class   = TradeJournalSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field       = 'pk'
+    lookup_value_regex = '[0-9]+'
 
     def get_queryset(self):
         return TradeJournal.objects.filter(user=self.request.user)
@@ -86,6 +92,8 @@ class TradeJournalViewSet(viewsets.ModelViewSet):
 class WatchlistViewSet(viewsets.ModelViewSet):
     serializer_class   = WatchlistSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field       = 'pk'
+    lookup_value_regex = '[0-9]+'
 
     def get_queryset(self):
         return Watchlist.objects.filter(user=self.request.user)
