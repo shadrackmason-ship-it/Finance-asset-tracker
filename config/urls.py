@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 from decouple import config
 from honeypot.decorators import honeypot_exempt
 from core.views import landing, error_403, error_404, error_500
+from users.views import register
 from users.forms import EmailOrUsernameAuthForm
 
 # Secret admin path — only you know this from .env
@@ -28,6 +29,7 @@ urlpatterns = [
 
     # ── Public routes ──
     path('', landing, name='landing'),
+    path('register/', register, name='register'),
     path('app/', include('core.urls')),
     # Override login with email-or-username form
     path('accounts/login/', auth_views.LoginView.as_view(
