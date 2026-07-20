@@ -15,6 +15,10 @@ services:
         fromDatabase:
           name: masontrack-db
           property: connectionString
+      - key: ADMIN_URL
+        value: mt-admin-x9k2
+      - key: PYTHON_VERSION
+        value: 3.12.0
       - key: EMAIL_BACKEND
         value: django.core.mail.backends.smtp.EmailBackend
       - key: EMAIL_HOST
@@ -24,15 +28,11 @@ services:
       - key: EMAIL_HOST_USER
         value: rakitamason@gmail.com
       - key: EMAIL_HOST_PASSWORD
-        value: hpeymnterqvwqkxg
+        sync: false
       - key: DEFAULT_FROM_EMAIL
         value: MasonTrack <rakitamason@gmail.com>
       - key: OWNER_EMAIL
         value: rakitamason@gmail.com
-      - key: ADMIN_URL
-        value: mt-admin-x9k2
-      - key: PYTHON_VERSION
-        value: 3.12.0
 
 databases:
   - name: masontrack-db

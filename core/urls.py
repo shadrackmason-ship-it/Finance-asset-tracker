@@ -18,4 +18,12 @@ urlpatterns = [
 
     path('market/', views.market, name='market'),
     path('risk-calculator/', views.risk_calculator, name='risk_calculator'),
+
+    path('journal/', views.journal_list, name='journal_list'),
+    path('journal/add/', views.journal_create, name='journal_create'),
+    path('journal/<int:pk>/edit/', views.journal_update, name='journal_update'),
+    path('journal/<int:pk>/delete/', views.journal_delete, name='journal_delete'),
+
+    path('watchlist/', views.watchlist, name='watchlist'),
+    path('watchlist/<int:pk>/delete/', views.watchlist_delete, name='watchlist_delete'),
 ]

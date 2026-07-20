@@ -7,8 +7,8 @@ from decimal import Decimal
 import json
 import logging
 
-from .models import Asset, Transaction
-from .forms import AssetForm, TransactionForm
+from .models import Asset, Transaction, TradeJournal, Watchlist
+from .forms import AssetForm, TransactionForm, TradeJournalForm, WatchlistForm
 
 logger = logging.getLogger('masontrack')
 
@@ -214,6 +214,83 @@ def market(request):
 @login_required
 def risk_calculator(request):
     return render(request, 'core/risk_calculator.html')
+
+
+@login_required
+def journal_list(request):
+    entries = TradeJournal.objects.filter(user=request.user)
+    wins    = entries.filter(outcome='win').count()
+    losses  = entries.filter(outcome='loss').count()
+    total   = entries.count()
+    win_rate = round((wins / total * 100), 1) if total else 0
+    total_pnl = sum(e.pnl for e in entries if e.pnl) or 0
+    return render(request, 'core/journal_list.html', {
+        'entries': entries, 'wins': wins, 'losses': losses,
+        'total': total, 'win_rate': win_rate, 'total_pnl': total_pnl,
+    })
+
+
+@login_required
+def journal_create(request):
+    if request.method == 'POST':
+        form = TradeJournalForm(request.POST)
+        if form.is_valid():
+            entry = form.save(commit=False)
+            entry.user = request.user
+            entry.save()
+            messages.success(request, 'Trade logged to journal.')
+            return redirect('journal_list')
+    else:
+        form = TradeJournalForm()
+    return render(request, 'core/journal_form.html', {'form': form, 'title': 'Log Trade'})
+
+
+@login_required
+def journal_update(request, pk):
+    entry = get_object_or_404(TradeJournal, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = TradeJournalForm(request.POST, instance=entry)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Journal entry updated.')
+            return redirect('journal_list')
+    else:
+        form = TradeJournalForm(instance=entry)
+    return render(request, 'core/journal_form.html', {'form': form, 'title': 'Edit Trade'})
+
+
+@login_required
+def journal_delete(request, pk):
+    entry = get_object_or_404(TradeJournal, pk=pk, user=request.user)
+    if request.method == 'POST':
+        entry.delete()
+        messages.success(request, 'Journal entry deleted.')
+        return redirect('journal_list')
+    return render(request, 'core/confirm_delete.html', {'object': entry, 'type': 'Journal Entry'})
+
+
+@login_required
+def watchlist(request):
+    items = Watchlist.objects.filter(user=request.user)
+    form  = WatchlistForm()
+    if request.method == 'POST':
+        form = WatchlistForm(request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.user = request.user
+            item.save()
+            messages.success(request, f'{item.symbol} added to watchlist.')
+            return redirect('watchlist')
+    return render(request, 'core/watchlist.html', {'items': items, 'form': form})
+
+
+@login_required
+def watchlist_delete(request, pk):
+    item = get_object_or_404(Watchlist, pk=pk, user=request.user)
+    if request.method == 'POST':
+        item.delete()
+        return redirect('watchlist')
+    return redirect('watchlist')
 
 
 @login_required

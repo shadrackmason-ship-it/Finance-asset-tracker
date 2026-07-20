@@ -7,6 +7,7 @@ staticfiles/
 media/
 .env
 .env.production
+.env.render
 *.egg-info/
 logs/*.log
 .DS_Store

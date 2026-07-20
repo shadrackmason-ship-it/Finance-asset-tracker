@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Watchlist — MasonTrack{% endblock %}
+{% block page_title %}Watchlist{% endblock %}
+{% block nav_watchlist %}active{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <!-- Add form -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-plus-circle me-2" style="color:var(--accent-soft)"></i>Add to Watchlist</span>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Symbol</label>
+            {{ form.symbol }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">TradingView Symbol</label>
+            {{ form.tv_symbol }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            {{ form.notes }}
+          </div>
+          <button type="submit" class="btn-accent w-100" style="justify-content:center;">
+            <i class="bi bi-plus-lg"></i> Add Symbol
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watchlist table -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-eye me-2" style="color:var(--accent-soft)"></i>Watching {{ items|length }} Symbol{{ items|length|pluralize }}</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr><th>Symbol</th><th>TradingView</th><th>Notes</th><th>Added</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td class="fw-600">{{ item.symbol }}</td>
+              <td>
+                {% if item.tv_symbol %}
+                <a href="{% url 'market' %}?symbol={{ item.tv_symbol }}" style="color:var(--accent-soft);text-decoration:none;">
+                  <i class="bi bi-bar-chart-line me-1"></i>{{ item.tv_symbol }}
+                </a>
+                {% else %}—{% endif %}
+              </td>
+              <td style="color:var(--text-muted)">{{ item.notes|default:"—" }}</td>
+              <td style="color:var(--text-muted)">{{ item.added_at|date:"M d, Y" }}</td>
+              <td>
+                <form method="post" action="{% url 'watchlist_delete' item.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-icon-del"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">
+              <div class="empty-state">
+                <i class="bi bi-eye empty-icon"></i>
+                <p>No symbols on your watchlist yet.</p>
+              </div>
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

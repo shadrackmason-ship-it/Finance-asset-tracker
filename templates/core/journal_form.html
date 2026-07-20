@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — MasonTrack{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block nav_journal %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-journal-text me-2" style="color:var(--accent-soft)"></i>{{ title }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label">Symbol</label>
+              {{ form.symbol }}
+              {% if form.symbol.errors %}<div style="color:var(--red);font-size:0.76rem;">{{ form.symbol.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Direction</label>
+              {{ form.direction }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Entry Price</label>
+              {{ form.entry_price }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Exit Price</label>
+              {{ form.exit_price }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Stop Loss</label>
+              {{ form.stop_loss }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Take Profit</label>
+              {{ form.take_profit }}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Lot Size</label>
+              {{ form.lot_size }}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">P&L ({{ currency_symbol }})</label>
+              {{ form.pnl }}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">R:R Ratio</label>
+              {{ form.rr_ratio }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Outcome</label>
+              {{ form.outcome }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Date</label>
+              {{ form.date }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Setup Notes <span style="color:var(--text-muted);font-weight:400;">(Why did you take this trade?)</span></label>
+              {{ form.setup_notes }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Lesson <span style="color:var(--text-muted);font-weight:400;">(What did you learn?)</span></label>
+              {{ form.lesson }}
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn-accent"><i class="bi bi-check-lg"></i> Save Entry</button>
+            <a href="{% url 'journal_list' %}" class="btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
