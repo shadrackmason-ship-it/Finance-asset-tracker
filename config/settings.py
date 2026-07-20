@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'axes',
     'honeypot',
     'rest_framework',
+    'drf_spectacular',
     'users',
     'core',
 ]
@@ -208,6 +209,25 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'MasonTrack API',
+    'DESCRIPTION': 'REST API for MasonTrack — personal finance and asset tracking platform. All endpoints require JWT authentication except /api/auth/token/ and /api/auth/refresh/.',
+    'VERSION': '1.0.0',
+    'CONTACT': {'name': 'Shadrack Mason', 'url': 'https://github.com/shadrackmason-ship-it'},
+    'LICENSE': {'name': 'MIT'},
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'auth',         'description': 'JWT token obtain and refresh'},
+        {'name': 'assets',       'description': 'Portfolio asset management'},
+        {'name': 'transactions', 'description': 'Buy, sell, deposit, withdrawal logs'},
+        {'name': 'journal',      'description': 'Trade journal entries'},
+        {'name': 'watchlist',    'description': 'Symbol watchlist'},
+        {'name': 'portfolio',    'description': 'Portfolio P&L summary'},
+    ],
 }
 
 from datetime import timedelta

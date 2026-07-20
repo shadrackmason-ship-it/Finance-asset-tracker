@@ -1,10 +1,17 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from .models import Asset, Transaction, TradeJournal, Watchlist
 
 
 class AssetSerializer(serializers.ModelSerializer):
     total_quantity = serializers.ReadOnlyField()
     current_value  = serializers.ReadOnlyField()
+
+    @extend_schema_field(serializers.DecimalField(max_digits=20, decimal_places=8))
+    def get_total_quantity(self): pass
+
+    @extend_schema_field(serializers.DecimalField(max_digits=20, decimal_places=8))
+    def get_current_value(self): pass
 
     class Meta:
         model  = Asset
@@ -15,7 +22,7 @@ class AssetSerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     asset_name  = serializers.ReadOnlyField(source='asset.name')
-    total_value = serializers.ReadOnlyField()
+    total_value = serializers.DecimalField(max_digits=20, decimal_places=8, read_only=True)
 
     class Meta:
         model  = Transaction

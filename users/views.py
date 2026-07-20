@@ -20,14 +20,14 @@ def register(request):
 @login_required
 def profile(request):
     regions = [
-        ('Americas',     '🌎', 'USD, CAD, BRL, MXN...'),
-        ('Europe',       '🌍', 'EUR, GBP, CHF, SEK...'),
-        ('Africa',       '🌍', 'NGN, ZAR, KES, GHS...'),
-        ('Middle East',  '🌏', 'AED, SAR, QAR, ILS...'),
-        ('Asia',         '🌏', 'JPY, CNY, INR, KRW...'),
-        ('Pacific',      '🌏', 'AUD, NZD, SGD, HKD...'),
-        ('Crypto',       '₿',  'BTC, ETH, SOL, BNB...'),
-        ('Commodities',  '🥇', 'Gold, Silver, Oil...'),
+        ('Americas',     'AM', 'USD, CAD, BRL, MXN...'),
+        ('Europe',       'EU', 'EUR, GBP, CHF, SEK...'),
+        ('Africa',       'AF', 'NGN, ZAR, KES, GHS...'),
+        ('Middle East',  'ME', 'AED, SAR, QAR, ILS...'),
+        ('Asia',         'AS', 'JPY, CNY, INR, KRW...'),
+        ('Pacific',      'PA', 'AUD, NZD, SGD, HKD...'),
+        ('Crypto',       'CR', 'BTC, ETH, SOL, BNB...'),
+        ('Commodities',  'CO', 'Gold, Silver, Oil...'),
     ]
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user)

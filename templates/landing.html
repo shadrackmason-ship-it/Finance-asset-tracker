@@ -158,7 +158,13 @@
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 16px 18px; display: flex; align-items: center; gap: 12px;
     }
-    .region-flag { font-size: 1.6rem; }
+    .region-icon {
+      width: 36px; height: 36px; background: var(--accent-glow);
+      border: 1px solid rgba(124,58,237,0.3); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800; color: var(--accent-soft);
+      letter-spacing: 0.03em; flex-shrink: 0;
+    }
     .region-name { font-size: 0.875rem; font-weight: 600; }
     .region-desc { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
 
@@ -327,14 +333,14 @@
     <h2 class="section-title">Built for every corner of the world</h2>
     <p class="section-sub">Whether you're in Lagos, London, Mumbai, or São Paulo — MasonTrack speaks your financial language.</p>
     <div class="regions-grid">
-      <div class="region-card"><span class="region-flag">🌎</span><div><div class="region-name">Americas</div><div class="region-desc">USD, CAD, BRL, MXN, ARS...</div></div></div>
-      <div class="region-card"><span class="region-flag">🇬🇧</span><div><div class="region-name">Europe</div><div class="region-desc">EUR, GBP, CHF, SEK, PLN...</div></div></div>
-      <div class="region-card"><span class="region-flag">🌍</span><div><div class="region-name">Africa</div><div class="region-desc">NGN, ZAR, KES, GHS, EGP...</div></div></div>
-      <div class="region-card"><span class="region-flag">🕌</span><div><div class="region-name">Middle East</div><div class="region-desc">AED, SAR, QAR, ILS...</div></div></div>
-      <div class="region-card"><span class="region-flag">🌏</span><div><div class="region-name">Asia</div><div class="region-desc">JPY, CNY, INR, KRW, SGD...</div></div></div>
-      <div class="region-card"><span class="region-flag">🦘</span><div><div class="region-name">Pacific</div><div class="region-desc">AUD, NZD, HKD, TWD...</div></div></div>
-      <div class="region-card"><span class="region-flag">₿</span><div><div class="region-name">Crypto</div><div class="region-desc">BTC, ETH, SOL, BNB, XRP...</div></div></div>
-      <div class="region-card"><span class="region-flag">🥇</span><div><div class="region-name">Commodities</div><div class="region-desc">Gold, Silver, Oil, Gas...</div></div></div>
+      <div class="region-card"><div class="region-icon">AM</div><div><div class="region-name">Americas</div><div class="region-desc">USD, CAD, BRL, MXN, ARS...</div></div></div>
+      <div class="region-card"><div class="region-icon">EU</div><div><div class="region-name">Europe</div><div class="region-desc">EUR, GBP, CHF, SEK, PLN...</div></div></div>
+      <div class="region-card"><div class="region-icon">AF</div><div><div class="region-name">Africa</div><div class="region-desc">NGN, ZAR, KES, GHS, EGP...</div></div></div>
+      <div class="region-card"><div class="region-icon">ME</div><div><div class="region-name">Middle East</div><div class="region-desc">AED, SAR, QAR, ILS...</div></div></div>
+      <div class="region-card"><div class="region-icon">AS</div><div><div class="region-name">Asia</div><div class="region-desc">JPY, CNY, INR, KRW, SGD...</div></div></div>
+      <div class="region-card"><div class="region-icon">PA</div><div><div class="region-name">Pacific</div><div class="region-desc">AUD, NZD, HKD, TWD...</div></div></div>
+      <div class="region-card"><div class="region-icon">CR</div><div><div class="region-name">Crypto</div><div class="region-desc">BTC, ETH, SOL, BNB, XRP...</div></div></div>
+      <div class="region-card"><div class="region-icon">CO</div><div><div class="region-name">Commodities</div><div class="region-desc">Gold, Silver, Oil, Gas...</div></div></div>
     </div>
   </div>
 </div>
