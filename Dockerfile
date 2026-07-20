@@ -3,10 +3,11 @@ FROM python:3.12-slim
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev && rm -rf /var/lib/apt/lists/*
+    libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -15,6 +16,6 @@ COPY . .
 
 EXPOSE 8000
 
-CMD python manage.py migrate --noinput && \
-    python manage.py collectstatic --noinput && \
-    gunicorn config.wsgi:application --workers 2 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT
+CMD sh -c "python manage.py migrate --noinput && \
+           python manage.py collectstatic --noinput && \
+           gunicorn config.wsgi:application --workers 2 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT"
