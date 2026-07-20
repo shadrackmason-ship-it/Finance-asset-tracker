@@ -14,3 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 8000
+
+CMD python manage.py migrate --noinput && \
+    python manage.py collectstatic --noinput && \
+    gunicorn config.wsgi:application --workers 2 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT
