@@ -94,9 +94,12 @@ def asset_create(request):
         if form.is_valid():
             asset = form.save(commit=False)
             asset.user = request.user
-            asset.save()
-            messages.success(request, f'Asset "{asset.name}" added successfully.')
-            return redirect('asset_list')
+            if Asset.objects.filter(user=request.user, name=asset.name).exists():
+                form.add_error('name', 'You already have an asset with this name.')
+            else:
+                asset.save()
+                messages.success(request, f'Asset "{asset.name}" added successfully.')
+                return redirect('asset_list')
     else:
         form = AssetForm()
     return render(request, 'core/asset_form.html', {'form': form, 'title': 'Add Asset', 'examples': examples})

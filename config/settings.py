@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 from decouple import config
 import dj_database_url
 
@@ -230,7 +231,6 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),

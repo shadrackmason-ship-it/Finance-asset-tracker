@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponseNotFound
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 from decouple import config
 from honeypot.decorators import honeypot_exempt
 from rest_framework.routers import DefaultRouter
@@ -41,7 +42,13 @@ urlpatterns = [
     path('.env', fake_404),
     path('config.php', fake_404),
 
-    # ── Public routes ──
+    # Favicon — redirect /favicon.ico to the static file
+    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+
+    # Chrome DevTools probe — silence the 404
+    path('.well-known/appspecific/com.chrome.devtools.json', fake_404),
+
+    # Public routes
     path('', landing, name='landing'),
     path('register/', register, name='register'),
     path('app/', include('core.urls')),

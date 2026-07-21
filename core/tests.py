@@ -228,4 +228,5 @@ class PortfolioAPITests(TestCase):
         res = self.client.get(reverse('api-portfolio'))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data['holdings']), 1)
-        self.assertEqual(float(res.data['total_pnl']), 10000.0)
+        from decimal import Decimal
+        self.assertEqual(Decimal(str(res.data['total_pnl'])), Decimal('10000'))

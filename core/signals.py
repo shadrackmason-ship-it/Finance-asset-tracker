@@ -42,7 +42,7 @@ def on_login_failed(sender, credentials, request, **kwargs):
     ua = request.META.get('HTTP_USER_AGENT', '')[:120]
     logger.warning('LOGIN_FAILED user=%s ip=%s ua=%s', username, ip, ua)
     _notify_owner(
-        f'[MasonTrack] ⚠️ Failed Login Attempt — {username}',
+        f'[MasonTrack] Failed Login Attempt — {username}',
         f'Failed login attempt on your platform.\n\nUsername tried: {username}\nIP: {ip}\nBrowser: {ua}\n\nIf you see many of these, an attacker may be targeting your app.'
     )
 
