@@ -12,7 +12,7 @@ A personal finance and trading tool for traders and investors. Track your portfo
 - Asset allocation chart showing portfolio breakdown
 - Transaction history — buy, sell, deposit, withdrawal with full audit trail
 - 50+ world currencies (USD, EUR, NGN, KES, ZAR, INR, BRL and more)
-- 55+ timezones — all timestamps in your local timezone
+- 55+ time zones — all timestamps in your local timezone
 - Brute-force lockout, CSRF protection, CSP headers, rate limiting
 - Global market coverage — Crypto, Forex, Stocks, Commodities, Indices
 - REST API with JWT authentication
@@ -53,7 +53,6 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Open http://127.0.0.1:8000
 
 ---
 
@@ -90,7 +89,7 @@ DB_PASSWORD=your-db-password
 DB_HOST=database
 DB_PORT=5432
 
-CACHE_BACKEND=django.core.cache.backends.redis.RedisCache
+CACHE_BACKEND=django.core.cache.backends.redisRedisCache
 REDIS_URL=redis://redis:6379/1
 
 EMAIL_HOST=smtp.gmail.com
