@@ -2,33 +2,39 @@ services:
   - type: web
     name: masontrack
     runtime: docker
+    dockerCommand: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120"
     envVars:
       - key: DJANGO_DEBUG
-        value: False
+        value: "False"
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
         value: .onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://masontrack.onrender.com
       - key: DATABASE_URL
         fromDatabase:
           name: masontrack-db
           property: connectionString
+      - key: CACHE_BACKEND
+        value: django.core.cache.backends.locmem.LocMemCache
       - key: ADMIN_URL
         value: mt-admin-x9k2
-      - key: PYTHON_VERSION
-        value: 3.12.0
       - key: EMAIL_BACKEND
         value: django.core.mail.backends.smtp.EmailBackend
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
-        value: 587
+        value: "587"
       - key: EMAIL_HOST_USER
         value: rakitamason@gmail.com
       - key: EMAIL_HOST_PASSWORD
         sync: false
       - key: DEFAULT_FROM_EMAIL
-        value: MasonTrack <rakitamason@gmail.com>
+        value: "MasonTrack <rakitamason@gmail.com>"
       - key: OWNER_EMAIL
         value: rakitamason@gmail.com
 
